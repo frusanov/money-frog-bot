@@ -6,7 +6,7 @@ export const store = new SimpleChatStore();
 export async function contextHandler(
   userId: number,
   text: string | undefined,
-  files?: URL[],
+  files?: URL[]
 ) {
   store.addMessage(userId.toString(), {
     role: "user",
@@ -23,7 +23,7 @@ export async function contextHandler(
                 image_url: {
                   url: file.toString(),
                 },
-              }) as MessageContentDetail,
+              } as MessageContentDetail)
           )
         : []),
     ],
@@ -33,7 +33,17 @@ export async function contextHandler(
   const lastMessage = chatHistory.pop();
 
   const result = await moneyFrogAgent.run(lastMessage?.content ?? "", {
-    chatHistory,
+    chatHistory: [
+      {
+        role: "system",
+        content: `
+          A helpful agent that can answer questions about money.
+
+          Current date-time is: ${new Date().toISOString()}
+        `,
+      },
+      ...chatHistory,
+    ],
   });
 
   store.addMessage(userId.toString(), {
