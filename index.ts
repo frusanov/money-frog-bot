@@ -31,7 +31,7 @@ bot.on(message("photo"), async (ctx) => {
   const fileURLs = await Promise.all(
     ctx.message.photo.map((photo) => {
       return ctx.telegram.getFileLink(photo.file_id);
-    }),
+    })
   );
 
   await ctx.persistentChatAction("typing", async () => {

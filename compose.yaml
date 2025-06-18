@@ -1,0 +1,7 @@
+services:
+  money-frog-bot:
+    image: money-frog
+    build: .
+    volumes:
+      - ./.env:/app/.env
+    restart: always

@@ -9,7 +9,11 @@ bun install
 To run:
 
 ```bash
-bun run index.ts
+bun run start
 ```
 
-This project was created using `bun init` in bun v1.2.11. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
+### Enviroment Variables
+- `BOT_TOKEN` - Telegram Bot Token
+- `ACCESS_LIST` - Users' IDs devided by comma
+- `FIREFLY_BASE_URL` - Base URL for your FirelyIII instance (without `/api`)
+- `FIREFLY_TOKEN` - Firefly Access Token
