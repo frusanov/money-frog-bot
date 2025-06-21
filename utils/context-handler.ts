@@ -1,5 +1,6 @@
 import { SimpleChatStore, type MessageContentDetail } from "llamaindex";
 import { moneyFrogAgent } from "../agents/money-frog";
+import { getSystemPrompt } from "./get-system-prompt";
 
 export const store = new SimpleChatStore();
 
@@ -36,11 +37,7 @@ export async function contextHandler(
     chatHistory: [
       {
         role: "system",
-        content: `
-          A helpful agent that can answer questions about money.
-
-          Current date-time is: ${new Date().toISOString()}
-        `,
+        content: getSystemPrompt(),
       },
       ...chatHistory,
     ],
