@@ -4,7 +4,8 @@
   "type": "module",
   "private": true,
   "devDependencies": {
-    "@types/node": "latest"
+    "@types/node": "latest",
+    "drizzle-kit": "^0.31.1"
   },
   "scripts": {
     "start": "tsx index.ts"
@@ -13,10 +14,12 @@
     "typescript": "^5"
   },
   "dependencies": {
+    "@electric-sql/pglite": "^0.3.3",
     "@llamaindex/openai": "^0.4.4",
     "@llamaindex/tools": "^0.0.16",
     "@llamaindex/workflow": "^1.1.9",
     "dotenv": "^16.5.0",
+    "drizzle-orm": "^0.44.2",
     "llamaindex": "^0.11.8",
     "telegraf": "^4.16.3",
     "tsx": "^4.20.3",
