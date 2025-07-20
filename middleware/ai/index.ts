@@ -2,6 +2,7 @@ import type { Context, MiddlewareFn } from "telegraf";
 import { message } from "telegraf/filters";
 import { createDebug } from "../../utils/debug";
 import { contextHandler } from "../../utils/context-handler";
+import { getErrorReporter } from "../../utils/error-reporter";
 
 export const debug = createDebug("ai-middleware");
 
@@ -15,8 +16,13 @@ export const aiMiddleware: MiddlewareFn<Context> = (async (ctx, next) => {
         message_id,
         chat: { id },
       } = ctx._preparedMessage;
-      ctx.telegram.editMessageText(id, message_id, undefined, "Error");
-      return next();
+      await ctx.telegram.editMessageText(
+        id,
+        message_id,
+        undefined,
+        "Error: No message content"
+      );
+      return;
     }
 
     if (ctx.has(message("text"))) text = ctx.message.text;
@@ -29,20 +35,43 @@ export const aiMiddleware: MiddlewareFn<Context> = (async (ctx, next) => {
       );
     }
 
-    return contextHandler(ctx, text, fileURLs);
+    await contextHandler(ctx, text, fileURLs);
   } catch (e) {
-    await ctx
-      .updatePreparedMessage(
-        `
-      En error occured:
+    console.error("Error in AI middleware:", e);
 
-      ${(e as Error)?.message || "Unknown error"}
+    // Report error to monitoring channel
+    const errorReporter = getErrorReporter();
+    if (errorReporter) {
+      try {
+        await errorReporter.reportError(e as Error, {
+          userId: ctx.message?.from?.id?.toString(),
+          username: ctx.message?.from?.username,
+          messageText: ctx.has(message("text")) ? ctx.message.text : undefined,
+          updateId: ctx.update.update_id,
+        });
+      } catch (reportError) {
+        console.error("Failed to report error:", reportError);
+      }
+    }
 
-      ${(e as Error)?.stack || ""}
-    `
-      )
-      .catch((e) => {
-        console.error(e);
-      });
+    try {
+      await ctx.updatePreparedMessage(
+        `An error occurred:
+
+${(e as Error)?.message || "Unknown error"}
+
+The bot will continue to work normally for new messages.`
+      );
+    } catch (updateError) {
+      console.error("Failed to update error message:", updateError);
+      // Fallback: try to send a simple error message
+      try {
+        await ctx.reply(
+          "❌ An error occurred. Please try again with a new message."
+        );
+      } catch (replyError) {
+        console.error("Failed to send error reply:", replyError);
+      }
+    }
   }
 }) as MiddlewareFn<Context>;
